@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "757731914254",
+    "project_id": "nomorewaste-ffb43",
+    "storage_bucket": "nomorewaste-ffb43.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:757731914254:android:5016f3024d9465f34b825f",
+        "android_client_info": {
+          "package_name": "com.example.waste_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "757731914254-6brebbalbtnvloeaugq5gu1outas92hk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.waste_app",
+            "certificate_hash": "a6776360d58bc63fcdb9708060d20a03949749d6"
+          }
+        },
+        {
+          "client_id": "757731914254-7vr693tkarnr02k6malc423g1nt8iord.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3Xk8AQOQD0gb9_HVKrwYL2g4mTPwFhwg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "757731914254-7vr693tkarnr02k6malc423g1nt8iord.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "757731914254-ou4d7l4hlhdf94bc9q3q3hrli3hu6dp7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.wasteApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

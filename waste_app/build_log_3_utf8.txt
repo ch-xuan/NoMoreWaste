@@ -1,0 +1,88 @@
+﻿Launching lib\main.dart on Windows in debug mode...
+Building Windows application...                                 
+flutter : CMake 
+Deprecation Warning at 
+C:/Users/Victor/Documen
+ts/WasteNoMore/waste_ap
+p/build/windows/x64/ext
+racted/firebase_cpp_sdk
+_windows/CMakeLists.txt
+:17 (cmake_minimum_requ
+ired):
+At line:1 char:1
++ flutter run -d 
+windows > 
+build_log_3.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (CMake Depreca   
+ ti...imum_required    
+)::String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+  Compatibility with 
+CMake < 3.10 will be 
+removed from a future 
+version of
+  CMake.
+
+  Update the VERSION 
+argument <min> value.  
+Or, use the 
+<min>...<max> syntax
+  to tell CMake that 
+the project requires 
+at least <min> but has 
+been updated
+  to work with 
+policies introduced by 
+<max> or earlier.
+
+
+lib/features/home/home_
+shell.dart(3,8): error 
+GFAA2A68C: Error when 
+reading 'lib/features/r
+ole_select/role_select_
+screen.dart': The 
+system cannot find the 
+file specified. [C:\Use
+rs\Victor\Documents\Was
+teNoMore\waste_app\buil
+d\windows\x64\flutter\f
+lutter_assemble.vcxproj
+]
+C:\Program 
+Files\Microsoft Visual 
+Studio\2022\Community\M
+SBuild\Microsoft\VC\v17
+0\Microsoft.CppCommon.t
+argets(254,5): error 
+MSB8066: Custom build 
+for 'C:\Users\Victor\Do
+cuments\WasteNoMore\was
+te_app\build\windows\x6
+4\CMakeFiles\ec202b54d0
+33c0383b15efa63dc15916\
+flutter_windows.dll.rul
+e;C:\Users\Victor\Docum
+ents\WasteNoMore\waste_
+app\build\windows\x64\C
+MakeFiles\245adfb8f6eb0
+5693a6bc6f7346871b9\flu
+tter_assemble.rule' 
+exited with code 1. [C:
+\Users\Victor\Documents
+\WasteNoMore\waste_app\
+build\windows\x64\flutt
+er\flutter_assemble.vcx
+proj]
+Building Windows application...                                    30.9s
+Error: Build process 
+failed.
