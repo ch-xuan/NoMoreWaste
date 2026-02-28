@@ -1,0 +1,202 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+
+    /// Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    /// Check if user is the owner of the document
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    /// Get current user's data from users collection
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    /// Check if user has a specific role
+    function hasRole(role) {
+      return isAuthenticated() && getUserData().role == role;
+    }
+
+    /// Check if user is verified/approved
+    function isApproved() {
+      return getUserData().verificationStatus == 'approved';
+    }
+
+    /// Check if user is admin (via custom claims)
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.admin == true;
+    }
+
+    // ============================================
+    // 1) USERS COLLECTION (Root)
+    // ============================================
+    match /users/{userId} {
+      // Anyone auth can read user profiles (needed for cross-role logic)
+      allow read: if isAuthenticated();
+      
+      // User creates own profile (including uploadDocsBase64)
+      allow create: if isOwner(userId);
+      
+      // User can update profile, BUT:
+      // - Cannot change 'role'
+      // - Cannot change 'isDisabled'
+      // - Cannot upgrade 'verificationStatus' (unless resetting to pending)
+      allow update: if isOwner(userId) && (
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isDisabled', 'verificationStatus'])) ||
+        (request.resource.data.verificationStatus == 'pending')
+      );
+      
+      // Admin can update everything
+      allow update: if isAdmin();
+      
+      // No one can delete users
+      allow delete: if false;
+    }
+
+    // ============================================
+    // 3) DONATIONS COLLECTION
+    // ============================================
+    match /donations/{donationId} {
+      allow read: if isAuthenticated();
+      
+      // Only approved donors can create
+      allow create: if hasRole('donor') && isApproved() && request.resource.data.vendorId == request.auth.uid;
+      
+      // Donors can update/delete their own
+      allow update, delete: if hasRole('donor') && resource.data.vendorId == request.auth.uid;
+      
+      // NGOs can update ONLY the status field from 'available' to 'requested'
+      // This happens when they create a donation request
+      allow update: if hasRole('ngo') && isApproved() &&
+                       resource.data.status == 'available' &&
+                       request.resource.data.status == 'requested' &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']);
+      
+      // Allow volunteers to mark as completed
+      allow update: if hasRole('volunteer') && request.resource.data.status == 'completed';
+      
+      allow update: if isAdmin();
+    }
+
+    // ============================================
+    // 4) REQUESTS COLLECTION
+    // ============================================
+    match /requests/{requestId} {
+      allow read: if isAuthenticated();
+      
+      // Only approved NGOs can create
+      allow create: if hasRole('ngo') && isApproved() && request.resource.data.ngoId == request.auth.uid;
+      
+      // NGOs can update their own
+      allow update: if hasRole('ngo') && resource.data.ngoId == request.auth.uid;
+
+      // Vendors (Donors) can update requests for their own donations (e.g. approve/reject)
+      allow update: if hasRole('donor') && 
+                       get(/databases/$(database)/documents/donations/$(resource.data.donationId)).data.vendorId == request.auth.uid;
+
+      // Allow volunteers to mark as completed
+      allow update: if hasRole('volunteer') && request.resource.data.status == 'completed';
+      
+      allow delete: if false;
+    }
+
+    // ============================================
+    // 5) TASKS COLLECTION
+    // ============================================
+    match /tasks/{taskId} {
+      allow read: if isAuthenticated();
+      
+      // NGOs/Admin create tasks. Donors (Vendors) also create tasks upon approval.
+      allow create: if hasRole('ngo') || (hasRole('donor') && request.resource.data.vendorId == request.auth.uid) || isAdmin();
+      
+      // Volunteers can update tasks if:
+      // 1. They are already assigned to it (resource.data.volunteerId == auth.uid)
+      // 2. They are claiming an OPEN task (resource.data.status == 'open' && request.resource.data.volunteerId == auth.uid)
+      allow update: if (hasRole('volunteer') && (
+        resource.data.volunteerId == request.auth.uid || 
+        (resource.data.status == 'open' && request.resource.data.volunteerId == request.auth.uid)
+      )) || isAdmin();
+      
+      allow delete: if false;
+    }
+
+    // ============================================
+    // 6) AUDIT LOGS
+    // ============================================
+    match /audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated(); // Allow any auth user to log actions
+    }
+
+    // ============================================
+    // 7) NOTIFICATIONS COLLECTION
+    // ============================================
+    match /notifications/{notificationId} {
+      // Users can read own notifications
+      allow read: if isAuthenticated() && resource.data.recipientId == request.auth.uid;
+      
+      // Authenticated users can create notifications for others
+      allow create: if isAuthenticated();
+      
+      // Users can update (mark as read) their own notifications
+      allow update: if isAuthenticated() && resource.data.recipientId == request.auth.uid;
+      
+      // Users can delete their own notifications
+      allow delete: if isAuthenticated() && resource.data.recipientId == request.auth.uid;
+    }
+
+    // ============================================
+    // 8) CHAT COLLECTIONS
+    // ============================================
+    
+    // Chat Threads - Conversations between two users
+    match /chat_threads/{threadId} {
+      // Users can read threads they are part of
+      // Note: resource == null check allows checking for existence (returns null/empty instead of permission error)
+      allow read: if isAuthenticated() && 
+                     (resource == null || request.auth.uid in resource.data.participantIds);
+      
+      // Allow creation if user is authenticated and is a participant
+      allow create: if isAuthenticated();
+      
+      // Users can update threads they are part of (for last message, unread count)
+      allow update: if isAuthenticated() && 
+                       request.auth.uid in resource.data.participantIds;
+      
+      // Allow deletion if authenticated (for task cancellation)
+      allow delete: if isAuthenticated();
+    }
+    
+    // Chat Messages - Individual messages
+    match /chat_messages/{messageId} {
+      // Users can read messages from threads they are part of
+      allow read: if isAuthenticated();
+      
+      // Users can create messages if authenticated
+      allow create: if isAuthenticated();
+      
+      // Users can update messages if authenticated
+      allow update: if isAuthenticated();
+      
+      // Allow deletion if authenticated
+      allow delete: if isAuthenticated();
+    }
+
+    // ============================================
+    // ADMIN SECTION
+    // ============================================
+    match /admin/{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

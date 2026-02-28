@@ -1,0 +1,112 @@
+{
+  // Example (Standard Edition):
+  //
+  // "indexes": [
+  //   {
+  //     "collectionGroup": "widgets",
+  //     "queryScope": "COLLECTION",
+  //     "fields": [
+  //       { "fieldPath": "foo", "arrayConfig": "CONTAINS" },
+  //       { "fieldPath": "bar", "mode": "DESCENDING" }
+  //     ]
+  //   },
+  //
+  //  "fieldOverrides": [
+  //    {
+  //      "collectionGroup": "widgets",
+  //      "fieldPath": "baz",
+  //      "indexes": [
+  //        { "order": "ASCENDING", "queryScope": "COLLECTION" }
+  //      ]
+  //    },
+  //   ]
+  // ]
+  //
+  // Example (Enterprise Edition):
+  //
+  // "indexes": [
+  //   {
+  //     "collectionGroup": "reviews",
+  //     "queryScope": "COLLECTION_GROUP",
+  //     "apiScope": "MONGODB_COMPATIBLE_API",
+  //     "density": "DENSE",
+  //     "multikey": false,
+  //     "fields": [
+  //       { "fieldPath": "baz", "mode": "ASCENDING" }
+  //     ]
+  //   },
+  //   {
+  //     "collectionGroup": "items",
+  //     "queryScope": "COLLECTION_GROUP",
+  //     "apiScope": "MONGODB_COMPATIBLE_API",
+  //     "density": "SPARSE_ANY",
+  //     "multikey": true,
+  //     "fields": [
+  //       { "fieldPath": "baz", "mode": "ASCENDING" }
+  //     ]
+  //   },
+  // ]
+  "indexes": [
+    {
+      "collectionGroup": "requests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ngoId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "chat_threads",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "participantIds",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "lastMessageTime",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "chat_messages",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "threadId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isRead",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "senderId",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "chat_messages",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "threadId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "timestamp",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
