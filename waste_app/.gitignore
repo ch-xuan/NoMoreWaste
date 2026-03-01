@@ -40,6 +40,7 @@ app.*.symbols
 app.*.map.json
 
 /waste_app/android/app/google-services.json
+/waste_app/lib/firebase_options.dart
 
 # Android Studio will place build artifacts here
 /android/app/debug
